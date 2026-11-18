@@ -51,4 +51,12 @@ apps/web       — site (Vite + React + TypeScript, GitHub Pages)
 
 - Every rule in `core` has tests. Control examples from the spec (grade sequence → expected lesson composition) are tests too.
 - Run tests and type checks before every push; do not open a PR with failing checks.
-- Stage 1 is done when the site reproduces the results of experiment 2 listed in the docs.
+- Python results of experiment 2 are not a reference. Віталій checks the site himself: small decks first, then 100-unit decks.
+
+## Purpose of the site
+
+- A research tool for developing the repetition algorithm, replacing Google Sheets. Not a product or a demo.
+- Every parameter is a constant in one registry (name, Ukrainian description, default, limits, spec reference). The Constants page is generated from it.
+- Grade-generation methods are pluggable; add new ones next to old ones.
+- Defaults are the spec; editing them on the site is an experiment recorded with the run, not a version change.
+- Page structure is not final; change it when it becomes inconvenient.
