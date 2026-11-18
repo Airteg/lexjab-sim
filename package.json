@@ -1,0 +1,12 @@
+{
+  "name": "lexjab-sim",
+  "private": true,
+  "packageManager": "pnpm@11.28.13",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
+  }
+}
