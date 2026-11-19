@@ -78,7 +78,7 @@ export function SeriesPage({ values, errors, result, onResult, onOpenRun }: Prop
           <button
             onClick={() =>
               downloadText(
-                `series-seed-${result.values.BASE_SEED}.json`,
+                `series-variant-${result.values.BASE_SEED}.json`,
                 JSON.stringify({ constants: result.values, ...result.series }, null, 1),
                 'application/json',
               )
@@ -93,7 +93,7 @@ export function SeriesPage({ values, errors, result, onResult, onOpenRun }: Prop
       {result && s && (
         <>
           <p className="muted">
-            {result.values.RUNS} прогонів · зерна {result.values.BASE_SEED}…{result.values.BASE_SEED + result.values.RUNS - 1} ·
+            {result.values.RUNS} прогонів · варіанти оцінок {result.values.BASE_SEED}…{result.values.BASE_SEED + result.values.RUNS - 1} ·
             гарантія {result.values.PERCENTILE}% · алгоритм {s.algorithmVersion} · симулятор {s.simVersion}
           </p>
           <Deviations values={result.values} />

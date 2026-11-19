@@ -35,7 +35,7 @@ export function RunPage({ values, errors, seed, onSeed, result, onResult }: Prop
     <div>
       <div className="toolbar">
         <label>
-          Зерно{' '}
+          Варіант оцінок{' '}
           <input className="num" type="text" inputMode="numeric" value={seedText} onChange={(e) => setSeedText(e.target.value)} />
         </label>
         <button className="primary" disabled={errors.length > 0 || !seedOk} onClick={run}>
@@ -43,13 +43,13 @@ export function RunPage({ values, errors, seed, onSeed, result, onResult }: Prop
         </button>
         {result && (
           <>
-            <button onClick={() => downloadText(`run-seed-${result.run.input.seed}.csv`, runLogCsv(result.run), 'text/csv')}>
+            <button onClick={() => downloadText(`run-variant-${result.run.input.seed}.csv`, runLogCsv(result.run), 'text/csv')}>
               Журнал CSV
             </button>
             <button
               onClick={() =>
                 downloadText(
-                  `run-seed-${result.run.input.seed}.json`,
+                  `run-variant-${result.run.input.seed}.json`,
                   JSON.stringify({ constants: result.values, ...result.run }, null, 1),
                   'application/json',
                 )
@@ -65,7 +65,7 @@ export function RunPage({ values, errors, seed, onSeed, result, onResult }: Prop
       {result && m && (
         <>
           <p className="muted">
-            Зерно {result.run.input.seed} · алгоритм {result.run.algorithmVersion} · симулятор {result.run.simVersion} ·{' '}
+            Варіант оцінок {result.run.input.seed} · алгоритм {result.run.algorithmVersion} · симулятор {result.run.simVersion} ·{' '}
             {result.run.completed ? 'прогін завершений' : 'прогін НЕ завершений (аварійна межа)'}
           </p>
           <Deviations values={result.values} />
