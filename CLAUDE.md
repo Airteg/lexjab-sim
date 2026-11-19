@@ -3,7 +3,9 @@
 ## Project
 
 LexJab Sim is a browser simulator of the unit-repetition algorithm for the LexJab mobile app.
-Owner: Віталій (GitHub: Airteg). He works from any device, often a tablet, and never runs code locally for this repo.
+Owner: Віталій (GitHub: Airteg). He works from any device, often a tablet.
+On his Windows PC he also runs the site locally: clone in `D:\ProjectsVVV\_Native\lexjab-sim`, VS Code with its own Claude Code.
+Node on that PC is managed by nvm. Do not pin a Node version (`.nvmrc`, `.node-version`, a narrower `engines.node` than `>=22`) that would force him to install another Node.
 
 Read before any task:
 - `doc/declaration.md` — goals, decisions, modes, deliverables, stages.
@@ -24,6 +26,8 @@ Read before any task:
 - Before opening a PR, check that `main` has not moved; rebase the branch onto the latest `main` if needed.
 - Every PR description lists what changed and how it was verified.
 - Package manager: pnpm only. Use `pnpm dlx`, never `npm` or `npx`.
+- Respect pnpm `minimumReleaseAge`: pick package versions old enough to pass it; never add exclusions to bypass it.
+- Instructions for the Claude Code on Віталій's PC: write them in English as one block he can paste, and end with a request for a very short report (a few lines, errors verbatim) addressed to another AI. He relays the report back.
 
 ## Facts only
 
@@ -50,7 +54,7 @@ apps/web       — site (Vite + React + TypeScript, GitHub Pages)
 ## Verification
 
 - Every rule in `core` has tests. Control examples from the spec (grade sequence → expected lesson composition) are tests too.
-- Run tests and type checks before every push; do not open a PR with failing checks.
+- Run type checks, lint (`pnpm lint`) and tests before every push; do not open a PR with failing checks.
 - Python results of experiment 2 are not a reference. Віталій checks the site himself: small decks first, then 100-unit decks.
 
 ## Purpose of the site
