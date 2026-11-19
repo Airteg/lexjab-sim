@@ -28,7 +28,7 @@
 - `packages/sim` — модель учня, прогони, статистика.
 - `apps/web` — сайт (GitHub Pages).
 
-Стек: Vite + React + TypeScript.
+Стек: Vite + React + TypeScript 6, ESLint.
 
 ## Як вносяться зміни
 
