@@ -20,4 +20,4 @@ jobs:
       - run: pnpm typecheck
       - run: pnpm lint
       - run: pnpm test
-      - run: pnpm --filter @lexjab/web build
+      - run: pnpm build
