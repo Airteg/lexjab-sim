@@ -4,7 +4,7 @@
 
 LexJab Sim is a browser simulator of the unit-repetition algorithm for the LexJab mobile app.
 Owner: Віталій (GitHub: Airteg). He works from any device, often a tablet.
-On his Windows PC he also runs the site locally: clone in `D:\ProjectsVVV\_Native\lexjab-sim`, VS Code with its own Claude Code.
+On his Windows PC he also runs the site locally: clone in `D:\ProjectsVVV\_Native\lexjab-sim`, VS Code, PowerShell. No local AI agent is used for this repo: all code, commits and PRs come from Claude in the cloud.
 Node on that PC is managed by nvm. Do not pin a Node version (`.nvmrc`, `.node-version`, a narrower `engines.node` than `>=22`) that would force him to install another Node.
 
 Read before any task:
@@ -27,7 +27,7 @@ Read before any task:
 - Every PR description lists what changed and how it was verified.
 - Package manager: pnpm only. Use `pnpm dlx`, never `npm` or `npx`.
 - Respect pnpm `minimumReleaseAge`: pick package versions old enough to pass it; never add exclusions to bypass it.
-- Instructions for the Claude Code on Віталій's PC: write them in English as one block he can paste, and end with a request for a very short report (a few lines, errors verbatim) addressed to another AI. He relays the report back.
+- Local actions on Віталій's PC (update the clone, install, start the dev server): give exact PowerShell commands, one per line, in the order to run them, with what output to expect and what to send back if a command fails. Usual set after a merge: `git pull --ff-only origin main`, `pnpm install --frozen-lockfile`, `pnpm --filter @lexjab/web dev` (site at `http://localhost:5173/lexjab-sim/`).
 
 ## Facts only
 
