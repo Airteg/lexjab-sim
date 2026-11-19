@@ -36,7 +36,8 @@ h1 { font-size: 22px; margin: 4px 0; }
 h2 { font-size: 17px; margin: 18px 0 8px; }
 .muted { color: var(--muted); font-size: 13px; }
 
-nav { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 8px 0 12px; }
+/* The header scrolls away; the tab row sticks to the top edge once it reaches it. */
+nav { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 8px 0 12px; position: sticky; top: 0; z-index: 10; background: var(--bg); }
 nav button { border: none; background: none; padding: 10px 14px; font-size: 15px; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; }
 nav button.active { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
 
