@@ -49,11 +49,17 @@ input.num { width: 7em; text-align: right; }
 .toolbar { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
 .errors { border: 1px solid #c0392b; color: #c0392b; border-radius: 6px; padding: 8px 10px; margin: 8px 0; }
 
-.group { border-top: 1px solid var(--line); }
+/* Groups in a row: as many columns of >= 280px as fit (4 on a wide screen, then 3, 2, 1). */
+.groups { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; align-items: start; }
+.group { border: 1px solid var(--line); border-radius: 8px; padding: 0 12px 4px; }
+.group h2 { margin-top: 12px; }
+.group .field:last-child { border-bottom: none; }
 .field { padding: 8px 0; border-bottom: 1px dashed var(--line); }
 .field.changed .field-label { font-weight: 600; }
 .field.changed { background: linear-gradient(90deg, rgba(47, 95, 208, 0.08), transparent 60%); }
-.field-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.field-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 12px; }
+.field-head select { max-width: 100%; }
+.field-head > :last-child { margin-left: auto; } /* control stays right-aligned when it wraps under the label */
 .field-note { color: var(--muted); font-size: 13px; margin-top: 2px; }
 .spec { white-space: nowrap; }
 .norm { color: var(--accent); }

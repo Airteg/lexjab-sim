@@ -98,24 +98,26 @@ export function ConstantsPage({ values, errors, onChange }: Props) {
           ))}
         </div>
       )}
-      {groups.map((g) => (
-        <section key={g} className="group">
-          <h2>{GROUP_LABELS[g]}</h2>
-          {g === 'learner' && (
-            <div className="toolbar">
-              Профіль:
-              {Object.values(EXP2_PROFILES).map((p) => (
-                <button key={p.label} onClick={() => onChange({ ...values, C1: p.c1, D1: p.d1, E1: p.e1 })}>
-                  {p.label}
-                </button>
-              ))}
-            </div>
-          )}
-          {REGISTRY.filter((d) => d.group === g).map((d) => (
-            <Field key={d.key} def={d} values={values} onChange={onChange} />
-          ))}
-        </section>
-      ))}
+      <div className="groups">
+        {groups.map((g) => (
+          <section key={g} className="group">
+            <h2>{GROUP_LABELS[g]}</h2>
+            {g === 'learner' && (
+              <div className="toolbar">
+                Профіль:
+                {Object.values(EXP2_PROFILES).map((p) => (
+                  <button key={p.label} onClick={() => onChange({ ...values, C1: p.c1, D1: p.d1, E1: p.e1 })}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {REGISTRY.filter((d) => d.group === g).map((d) => (
+              <Field key={d.key} def={d} values={values} onChange={onChange} />
+            ))}
+          </section>
+        ))}
+      </div>
     </div>
   );
 }
