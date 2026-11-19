@@ -14,7 +14,7 @@ Read before any task:
 ## Language
 
 - Talk to Віталій in Ukrainian, informal ("ти"). Be concise and document-like.
-- Віталій wants Claude to do everything it can; his own actions must be as few and as short as possible. He is often busy with other things and reads messages on the run.
+- Віталій wants Claude to do everything it can; his own actions must be as few and as short as possible. Reports and instructions for Vitaliy should be as short as possible.
 - If Віталій has to do anything (merge a PR, change a setting, answer a question), end the message with a section «Що тобі зробити»: short numbered steps — a direct link, the exact button or field as GitHub shows it, the exact value or text to paste. Detail only where a mistake is likely. Never leave a required action only in the middle of the message.
 - Ukrainian: all docs in `doc/`, `README.md`, commit messages, PR titles and descriptions, UI text of the site.
 - English: identifiers and comments in code, this file and any other AI instruction files. Code comments are written for Claude; Віталій does not read them.
