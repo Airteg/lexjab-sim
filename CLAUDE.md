@@ -27,7 +27,7 @@ Read before any task:
 - Every PR description lists what changed and how it was verified.
 - Package manager: pnpm only. Use `pnpm dlx`, never `npm` or `npx`.
 - Respect pnpm `minimumReleaseAge`: pick package versions old enough to pass it; never add exclusions to bypass it.
-- Local actions on Віталій's PC (update the clone, install, start the dev server): give exact PowerShell commands, one per line, in the order to run them, with what output to expect and what to send back if a command fails. Usual set after a merge: `git pull --ff-only origin main`, `pnpm install --frozen-lockfile`, `pnpm --filter @lexjab/web dev` (site at `http://localhost:5173/lexjab-sim/`).
+- Local actions on Віталій's PC (update the clone, install, start the dev server): give exact PowerShell commands, one per line, in the order to run them, with what output to expect and what to send back if a command fails. Usual set after a merge: `git pull --ff-only origin main`, `pnpm install --frozen-lockfile`, `pnpm start` (dev server, site at `http://localhost:5173/lexjab-sim/`).
 
 ## Facts only
 
