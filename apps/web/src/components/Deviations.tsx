@@ -2,9 +2,9 @@ import type { ConstantValues } from '@lexjab/sim';
 import { deviations } from '../lib/deviation.ts';
 
 /** Shows which constants of a result differ from the norm (spec defaults). */
-export function Deviations({ values }: { values: ConstantValues }) {
-  const d = deviations(values);
-  if (d.length === 0) return <p className="muted">Усі константи — за нормою ТЗ.</p>;
+export function Deviations({ values, skipLearner = false }: { values: ConstantValues; skipLearner?: boolean }) {
+  const d = deviations(values, skipLearner);
+  if (d.length === 0) return <p className="muted">{skipLearner ? 'Інші константи — за нормою ТЗ.' : 'Усі константи — за нормою ТЗ.'}</p>;
   return (
     <p className="muted">
       Відхилення від норми:{' '}

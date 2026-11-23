@@ -2,6 +2,7 @@ import { ALGORITHM_VERSION } from '@lexjab/core';
 import { SIM_VERSION, runDeck, toSeriesInput, validateValues } from '@lexjab/sim';
 import type { ConstantValues, RunResult, SeriesResult } from '@lexjab/sim';
 import { useEffect, useMemo, useState } from 'react';
+import type { AllLearnersResult } from './components/AllLearners.tsx';
 import { loadValues, saveValues } from './lib/storage.ts';
 import { ConstantsPage } from './pages/ConstantsPage.tsx';
 import { RunPage } from './pages/RunPage.tsx';
@@ -25,6 +26,7 @@ export function App() {
   const [seed, setSeed] = useState<number>(values.BASE_SEED);
   const [runResult, setRunResult] = useState<{ values: ConstantValues; run: RunResult } | null>(null);
   const [seriesResult, setSeriesResult] = useState<{ values: ConstantValues; series: SeriesResult } | null>(null);
+  const [allResult, setAllResult] = useState<AllLearnersResult | null>(null);
   const errors = useMemo(() => validateValues(values), [values]);
 
   useEffect(() => saveValues(values), [values]);
@@ -61,7 +63,9 @@ export function App() {
         ))}
       </nav>
       <main>
-        {tab === 'constants' && <ConstantsPage values={values} errors={errors} onChange={setValues} />}
+        {tab === 'constants' && (
+          <ConstantsPage values={values} errors={errors} onChange={setValues} allResult={allResult} onAllResult={setAllResult} />
+        )}
         {tab === 'run' && (
           <RunPage
             key={seed}

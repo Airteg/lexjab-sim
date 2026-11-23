@@ -5,7 +5,14 @@ import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_VALUES,
   REGISTRY,
+  allLearners,
+  assignDifficulty,
+  chanceTable,
+  dice,
   exp2,
+  forget,
+  ideal,
+  learnerSpec,
   mulberry32,
   nearestRank,
   runDeck,
@@ -14,7 +21,7 @@ import {
   toSeriesInput,
   validateValues,
 } from '../src/index.ts';
-import type { GradeFn, RunInput } from '../src/index.ts';
+import type { GradeFn, LearnerContext, RunInput } from '../src/index.ts';
 
 const baseInput = (deckSize: number, n: number, extra: Partial<RunInput> = {}): RunInput => ({
   deckSize,
@@ -37,6 +44,38 @@ function scripted(grades: readonly Grade[]): GradeFn {
   };
 }
 
+function chiSquare(xs: readonly number[], bins = 100): number {
+  const c = new Array<number>(bins).fill(0);
+  for (const x of xs) c[Math.floor(x * bins)]! += 1;
+  const e = xs.length / bins;
+  return c.reduce((s, o) => s + (o - e) ** 2 / e, 0);
+}
+
+function correlation(a: readonly number[], b: readonly number[]): number {
+  const n = a.length;
+  const ma = a.reduce((s, x) => s + x, 0) / n;
+  const mb = b.reduce((s, x) => s + x, 0) / n;
+  let sab = 0;
+  let saa = 0;
+  let sbb = 0;
+  for (let i = 0; i < n; i++) {
+    sab += (a[i]! - ma) * (b[i]! - mb);
+    saa += (a[i]! - ma) ** 2;
+    sbb += (b[i]! - mb) ** 2;
+  }
+  return sab / Math.sqrt(saa * sbb);
+}
+
+/** Frequencies of grades over many draws. */
+function freqOf(fn: GradeFn, ctx: LearnerContext, total = 200_000, seed = 7) {
+  const rand = mulberry32(seed);
+  const count = { 1: 0, 3: 0, 5: 0 };
+  for (let i = 0; i < total; i++) count[fn(ctx, rand)] += 1;
+  return { 1: count[1] / total, 3: count[3] / total, 5: count[5] / total };
+}
+
+const ctx0: LearnerContext = { itemId: 'U0', successes: 0, fives: 0 };
+
 describe('§2 PRNG', () => {
   it('is deterministic and in [0, 1)', () => {
     const a = mulberry32(42);
@@ -48,17 +87,42 @@ describe('§2 PRNG', () => {
       expect(x).toBeLessThan(1);
     }
   });
+
+  // Spec 02 §8: thresholds are about 5 standard errors; the generator is deterministic, so no flakiness.
+  it('is uniform: chi-square of 1 000 000 numbers in 100 bins < 148', () => {
+    const r = mulberry32(1);
+    expect(chiSquare(Array.from({ length: 1_000_000 }, r))).toBeLessThan(148);
+  });
+
+  it('has no lag-1 correlation within one stream', () => {
+    const r = mulberry32(1);
+    const xs = Array.from({ length: 1_000_001 }, r);
+    expect(Math.abs(correlation(xs.slice(0, -1), xs.slice(1)))).toBeLessThan(0.005);
+  });
+
+  it.each([1, 2, 11])('adjacent seeds are independent at number #%i', (k) => {
+    const a: number[] = [];
+    const b: number[] = [];
+    for (let s = 1; s <= 100_000; s++) {
+      const g = mulberry32(s);
+      const h = mulberry32(s + 1);
+      let x = 0;
+      let y = 0;
+      for (let i = 0; i < k; i++) {
+        x = g();
+        y = h();
+      }
+      a.push(x);
+      b.push(y);
+    }
+    expect(Math.abs(correlation(a, b))).toBeLessThan(0.016);
+    expect(chiSquare(a)).toBeLessThan(148);
+  });
 });
 
 describe('§3 learner exp2', () => {
-  function freq(ctx: { successes: number; fives: number }, p: { c1: number; d1: number; e1: number }) {
-    const fn = exp2(p);
-    const rand = mulberry32(7);
-    const count = { 1: 0, 3: 0, 5: 0 };
-    const total = 200_000;
-    for (let i = 0; i < total; i++) count[fn(ctx, rand)] += 1;
-    return { 1: count[1] / total, 3: count[3] / total, 5: count[5] / total };
-  }
+  const freq = (ctx: Omit<LearnerContext, 'itemId'>, p: { c1: number; d1: number; e1: number }) =>
+    freqOf(exp2(p), { itemId: 'U0', ...ctx });
 
   it('before the first success: P(1)=C1, P(3)=D1, rest 5', () => {
     const f = freq({ successes: 0, fives: 0 }, { c1: 0.3, d1: 0.5, e1: 0.7 });
@@ -78,6 +142,55 @@ describe('§3 learner exp2', () => {
     expect(f[1]).toBeCloseTo(0.6, 2);
     expect(f[3]).toBeCloseTo(0.4, 2);
     expect(f[5]).toBe(0);
+  });
+});
+
+describe('§3 other learners', () => {
+  it('ideal: always 5', () => {
+    const f = freqOf(ideal(), ctx0, 1000);
+    expect(f[5]).toBe(1);
+  });
+
+  it('dice: P(1)=P1, P(3)=P3 regardless of history', () => {
+    for (const ctx of [ctx0, { itemId: 'U0', successes: 9, fives: 9 }]) {
+      const f = freqOf(dice({ p1: 0.2, p3: 0.4 }), ctx);
+      expect(f[1]).toBeCloseTo(0.2, 2);
+      expect(f[3]).toBeCloseTo(0.4, 2);
+      expect(f[5]).toBeCloseTo(0.4, 2);
+    }
+  });
+
+  it('forget: before the first success like exp2, after it P(1)=F taken from 5', () => {
+    const p = { c1: 0.3, d1: 0.5, e1: 0.7 };
+    const before = freqOf(forget(p, 0.05), ctx0);
+    expect(before[1]).toBeCloseTo(0.3, 2);
+    expect(before[3]).toBeCloseTo(0.5, 2);
+    const after = freqOf(forget(p, 0.05), { itemId: 'U0', successes: 2, fives: 1 });
+    expect(after[1]).toBeCloseTo(0.05, 2);
+    expect(after[3]).toBeCloseTo(0.35, 2);
+    expect(after[5]).toBeCloseTo(0.6, 2);
+  });
+
+  it('mixed: difficulty shares match Л and С', () => {
+    const ids = Array.from({ length: 100_000 }, (_, i) => `U${i}`);
+    const d = assignDifficulty(ids, { easy: 0.3, medium: 0.5 }, mulberry32(3));
+    const count = { easy: 0, medium: 0, hard: 0 };
+    for (const v of d.values()) count[v] += 1;
+    expect(count.easy / ids.length).toBeCloseTo(0.3, 2);
+    expect(count.medium / ids.length).toBeCloseTo(0.5, 2);
+    expect(count.hard / ids.length).toBeCloseTo(0.2, 2);
+  });
+
+  it('chance table of exp2 matches spec 02 §3.3 (average learner)', () => {
+    const t = chanceTable({ method: 'exp2', c1: 0.3, d1: 0.5, e1: 0.7 });
+    const pct = t.rows[0]!.cells.map((c) => [c[1], c[3], c[5]].map((x) => Math.round(x * 100)));
+    expect(pct).toEqual([
+      [30, 50, 20],
+      [0, 50, 50],
+      [0, 35, 65],
+      [0, 24, 76],
+      [0, 17, 83],
+    ]);
   });
 });
 
@@ -108,7 +221,7 @@ describe('§4 run', () => {
   it('records the algorithm and simulator versions with the run', () => {
     const r = runDeck(baseInput(5, 5));
     expect(r.algorithmVersion).toBe('0.1.0');
-    expect(r.simVersion).toBe('0.1.0');
+    expect(r.simVersion).toBe('0.2.0');
   });
 });
 
@@ -186,6 +299,32 @@ describe('§6 series', () => {
   });
 });
 
+describe('§6.1 series "Усі учні"', () => {
+  it('has 8 learners in spec order', () => {
+    const l = allLearners({ ...DEFAULT_VALUES });
+    expect(l.map((x) => x.learner.method)).toEqual(['ideal', 'dice', 'exp2', 'exp2', 'exp2', 'exp2', 'forget', 'mixed']);
+  });
+
+  it('a learner row equals a plain series with that learner', () => {
+    const v = { ...DEFAULT_VALUES, RUNS: 20 };
+    for (const { learner } of allLearners(v)) {
+      const viaAll = runSeries(toSeriesInput(v, learner));
+      const plain = runSeries(toSeriesInput({ ...v, LEARNER_METHOD: learner.method, ...(learner.method === 'exp2' ? { C1: learner.c1, D1: learner.d1, E1: learner.e1 } : {}) }));
+      expect(viaAll).toEqual(plain);
+    }
+  });
+
+  it('ideal learner: every unit leaves after EXIT_STREAK tests', () => {
+    const v = { ...DEFAULT_VALUES, RUNS: 5 };
+    const s = runSeries(toSeriesInput(v, { method: 'ideal' }));
+    expect(s.rounds[0]?.testsPerUnit).toBe(v.EXIT_STREAK);
+  });
+
+  it('learnerSpec takes the parameters of the selected method', () => {
+    expect(learnerSpec({ ...DEFAULT_VALUES, LEARNER_METHOD: 'dice' })).toEqual({ method: 'dice', p1: 0.2, p3: 0.4 });
+  });
+});
+
 describe('§7 registry', () => {
   it('has every constant with a default value', () => {
     expect(REGISTRY.map((d) => d.key).sort()).toEqual(Object.keys(DEFAULT_VALUES).sort());
@@ -195,5 +334,7 @@ describe('§7 registry', () => {
   it('rejects invalid values', () => {
     const errors = validateValues({ ...DEFAULT_VALUES, C1: 1.5, DECK_SIZE: 0, EF_START: 100 });
     expect(errors).toHaveLength(3);
+    expect(validateValues({ ...DEFAULT_VALUES, DICE_P1: 0.7, DICE_P3: 0.4 })).toHaveLength(1);
+    expect(validateValues({ ...DEFAULT_VALUES, MIX_EASY: 0.3, MIX_MEDIUM: 0.7 })).toEqual([]);
   });
 });

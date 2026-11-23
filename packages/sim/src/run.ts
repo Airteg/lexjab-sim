@@ -65,7 +65,7 @@ export function simulate(input: RunInput, gradeFn: GradeFn, rand: Rand): RunResu
     for (const itemId of deck.lessonItems) {
       const before = deck.units.find((u) => u.itemId === itemId)!;
       const c = counters.get(itemId)!;
-      const grade = gradeFn(c, rand);
+      const grade = gradeFn({ itemId, successes: c.successes, fives: c.fives }, rand);
       deck = applyGrade(deck, itemId, grade);
       const after = deck.units.find((u) => u.itemId === itemId)!;
       if (grade !== 1) c.successes += 1;
@@ -91,5 +91,6 @@ export function simulate(input: RunInput, gradeFn: GradeFn, rand: Rand): RunResu
 
 /** Spec 02 §4: one run with the learner model from the input. */
 export function runDeck(input: RunInput): RunResult {
-  return simulate(input, learnerFromSpec(input.learner), mulberry32(input.seed));
+  const rand = mulberry32(input.seed);
+  return simulate(input, learnerFromSpec(input.learner, unitIds(input.deckSize), rand), rand);
 }
