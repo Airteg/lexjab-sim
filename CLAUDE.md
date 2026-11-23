@@ -35,6 +35,7 @@ Read before any task:
 - No invented rules, constants, formulas or results. Every algorithm rule comes from `doc/`. If something is missing or ambiguous, ask Віталій before implementing.
 - The spec in `doc/` is the norm; constants in code are its copy. To change a rule: update the spec first, then the code, in the same PR.
 - Any change of rules or constants bumps the version of the algorithm module.
+- Any PR that changes `packages/sim` (including the constants registry) bumps the simulator version: the last digit for changes that do not alter run results, the middle digit for changes that do. Update `SIM_VERSION`, `packages/sim/package.json`, the header of `doc/tz-02-sim.md`, `README.md` and the version test together. The site header shows the version, so Віталій can see that a deploy is live.
 - When reporting simulation results, state the parameters, number of runs and seed.
 
 ## Architecture
