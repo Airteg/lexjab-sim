@@ -87,3 +87,20 @@ table.map td.ef { padding: 0 6px; color: var(--muted); }
 .g5 { background: var(--g5); }
 .filler { box-shadow: inset 0 0 0 2px var(--fg); opacity: 0.75; }
 table.map .rend { border-right: 3px solid var(--fg); }
+
+/* Learner model: rule text, chance table, "Усі учні" table. */
+.method-note { font-size: 13px; margin-top: 6px; padding: 6px 8px; border-left: 3px solid var(--accent); background: rgba(47, 95, 208, 0.06); }
+.learner-chances, .all-learners { border: 1px solid var(--line); border-radius: 8px; padding: 0 12px 8px; margin-top: 12px; }
+.learner-chances h2, .all-learners h2 { margin-top: 12px; }
+.chance-wrap { overflow-x: auto; }
+table.chances { border-collapse: collapse; margin: 6px 0; font-variant-numeric: tabular-nums; }
+table.chances th, table.chances td { border-bottom: 1px solid var(--line); padding: 5px 10px; text-align: right; white-space: nowrap; }
+table.chances th:first-child, table.chances td:first-child { text-align: left; }
+table.chances th { font-weight: 500; color: var(--muted); font-size: 13px; }
+.c1, .c3, .c5 { padding: 0 3px; border-radius: 3px; }
+.c1 { background: var(--g1); }
+.c3 { background: var(--g3); }
+.c5 { background: var(--g5); }
+table.stats.all { font-variant-numeric: tabular-nums; }
+table.stats.all th { white-space: nowrap; }
+table.stats.all th.grp { text-align: center; }

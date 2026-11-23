@@ -1,7 +1,10 @@
-import { DEFAULT_VALUES, EXP2_PROFILES, GROUP_LABELS, REGISTRY } from '@lexjab/sim';
+import { DEFAULT_VALUES, EXP2_PROFILES, GROUP_LABELS, LEARNER_METHODS, REGISTRY, isRelevant, learnerSpec } from '@lexjab/sim';
 import type { ConstantDef, ConstantGroup, ConstantValues } from '@lexjab/sim';
 import type { Grade } from '@lexjab/core';
 import { useEffect, useState } from 'react';
+import { AllLearners } from '../components/AllLearners.tsx';
+import type { AllLearnersResult } from '../components/AllLearners.tsx';
+import { ChanceTable } from '../components/ChanceTable.tsx';
 import { isChanged, valueText } from '../lib/deviation.ts';
 import { parseNumber } from '../lib/format.ts';
 
@@ -9,6 +12,8 @@ interface Props {
   values: ConstantValues;
   errors: string[];
   onChange: (values: ConstantValues) => void;
+  allResult: AllLearnersResult | null;
+  onAllResult: (r: AllLearnersResult) => void;
 }
 
 function NumberField({ value, onChange }: { value: number; onChange: (v: number) => void }) {
@@ -78,11 +83,14 @@ function Field({ def, values, onChange }: { def: ConstantDef; values: ConstantVa
         {def.description} <span className="spec">{def.spec}</span>
         {changed && <span className="norm"> · норма: {valueText(DEFAULT_VALUES[def.key])}</span>}
       </div>
+      {def.kind === 'method' && (
+        <div className="method-note">{LEARNER_METHODS.find((m) => m.id === value)?.description}</div>
+      )}
     </div>
   );
 }
 
-export function ConstantsPage({ values, errors, onChange }: Props) {
+export function ConstantsPage({ values, errors, onChange, allResult, onAllResult }: Props) {
   const groups = Object.keys(GROUP_LABELS) as ConstantGroup[];
   return (
     <div>
@@ -102,7 +110,7 @@ export function ConstantsPage({ values, errors, onChange }: Props) {
         {groups.map((g) => (
           <section key={g} className="group">
             <h2>{GROUP_LABELS[g]}</h2>
-            {g === 'learner' && (
+            {g === 'learner' && (values.LEARNER_METHOD === 'exp2' || values.LEARNER_METHOD === 'forget') && (
               <div className="toolbar">
                 Профіль:
                 {Object.values(EXP2_PROFILES).map((p) => (
@@ -112,12 +120,18 @@ export function ConstantsPage({ values, errors, onChange }: Props) {
                 ))}
               </div>
             )}
-            {REGISTRY.filter((d) => d.group === g).map((d) => (
+            {REGISTRY.filter((d) => d.group === g && isRelevant(d, values)).map((d) => (
               <Field key={d.key} def={d} values={values} onChange={onChange} />
             ))}
           </section>
         ))}
       </div>
+      <section className="learner-chances">
+        <h2>Шанси оцінок: {LEARNER_METHODS.find((m) => m.id === values.LEARNER_METHOD)?.label}</h2>
+        <p className="muted">Для поточних параметрів моделі учня. «5» у заголовках — скільки «5» юніт уже отримав. ТЗ-02 §3</p>
+        {errors.length === 0 ? <ChanceTable learner={learnerSpec(values)} /> : <p className="muted">Виправ помилки вище.</p>}
+      </section>
+      <AllLearners values={values} errors={errors} result={allResult} onResult={onAllResult} />
     </div>
   );
 }

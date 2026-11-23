@@ -4,7 +4,8 @@ import { useRef, useState } from 'react';
 import { Deviations } from '../components/Deviations.tsx';
 import { downloadText } from '../lib/download.ts';
 import { fmt, parseNumber, pct } from '../lib/format.ts';
-import type { WorkerOut } from '../series.worker.ts';
+import { startSeries } from '../lib/seriesWorker.ts';
+import type { SeriesJob } from '../lib/seriesWorker.ts';
 
 interface Props {
   values: ConstantValues;
@@ -32,29 +33,26 @@ function StatCells({ s }: { s: Stat }) {
 export function SeriesPage({ values, errors, result, onResult, onOpenRun }: Props) {
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
   const [runIndex, setRunIndex] = useState('0');
-  const worker = useRef<Worker | null>(null);
+  const job = useRef<SeriesJob | null>(null);
 
   const start = () => {
-    worker.current?.terminate();
-    const w = new Worker(new URL('../series.worker.ts', import.meta.url), { type: 'module' });
-    worker.current = w;
+    job.current?.stop();
     const snapshot = values;
     setProgress({ done: 0, total: snapshot.RUNS });
-    w.onmessage = (e: MessageEvent<WorkerOut>) => {
-      if (e.data.type === 'progress') setProgress({ done: e.data.done, total: e.data.total });
-      else {
-        onResult({ values: snapshot, series: e.data.result });
+    job.current = startSeries(
+      [toSeriesInput(snapshot)],
+      (done, total) => setProgress({ done, total }),
+      ([series]) => {
+        onResult({ values: snapshot, series: series! });
         setProgress(null);
-        w.terminate();
-        worker.current = null;
-      }
-    };
-    w.postMessage(toSeriesInput(snapshot));
+        job.current = null;
+      },
+    );
   };
 
   const stop = () => {
-    worker.current?.terminate();
-    worker.current = null;
+    job.current?.stop();
+    job.current = null;
     setProgress(null);
   };
 
