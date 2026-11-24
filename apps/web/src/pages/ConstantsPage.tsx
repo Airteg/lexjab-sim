@@ -91,7 +91,8 @@ function Field({ def, values, onChange }: { def: ConstantDef; values: ConstantVa
 }
 
 export function ConstantsPage({ values, errors, onChange, allResult, onAllResult }: Props) {
-  const groups = Object.keys(GROUP_LABELS) as ConstantGroup[];
+  // Page columns; groups in one column are stacked cards in one grid cell.
+  const columns: ConstantGroup[][] = [['deck', 'view'], ['algorithm'], ['learner'], ['run']];
   return (
     <div>
       <div className="toolbar">
@@ -107,23 +108,27 @@ export function ConstantsPage({ values, errors, onChange, allResult, onAllResult
         </div>
       )}
       <div className="groups">
-        {groups.map((g) => (
-          <section key={g} className="group">
-            <h2>{GROUP_LABELS[g]}</h2>
-            {g === 'learner' && (values.LEARNER_METHOD === 'exp2' || values.LEARNER_METHOD === 'forget') && (
-              <div className="toolbar">
-                Профіль:
-                {Object.values(EXP2_PROFILES).map((p) => (
-                  <button key={p.label} onClick={() => onChange({ ...values, C1: p.c1, D1: p.d1, E1: p.e1 })}>
-                    {p.label}
-                  </button>
+        {columns.map((col) => (
+          <div key={col.join('+')} className="group-col">
+            {col.map((g) => (
+              <section key={g} className="group">
+                <h2>{GROUP_LABELS[g]}</h2>
+                {g === 'learner' && (values.LEARNER_METHOD === 'exp2' || values.LEARNER_METHOD === 'forget') && (
+                  <div className="toolbar">
+                    Профіль:
+                    {Object.values(EXP2_PROFILES).map((p) => (
+                      <button key={p.label} onClick={() => onChange({ ...values, C1: p.c1, D1: p.d1, E1: p.e1 })}>
+                        {p.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {REGISTRY.filter((d) => d.group === g && isRelevant(d, values)).map((d) => (
+                  <Field key={d.key} def={d} values={values} onChange={onChange} />
                 ))}
-              </div>
-            )}
-            {REGISTRY.filter((d) => d.group === g && isRelevant(d, values)).map((d) => (
-              <Field key={d.key} def={d} values={values} onChange={onChange} />
+              </section>
             ))}
-          </section>
+          </div>
         ))}
       </div>
       <section className="learner-chances">

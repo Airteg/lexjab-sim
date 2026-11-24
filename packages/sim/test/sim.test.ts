@@ -221,7 +221,7 @@ describe('§4 run', () => {
   it('records the algorithm and simulator versions with the run', () => {
     const r = runDeck(baseInput(5, 5));
     expect(r.algorithmVersion).toBe('0.1.0');
-    expect(r.simVersion).toBe('0.2.1');
+    expect(r.simVersion).toBe('0.2.2');
   });
 });
 
