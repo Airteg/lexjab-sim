@@ -6,10 +6,11 @@ import { EXP2_PROFILES } from './learners.ts';
 import type { LearnerMethodId, LearnerSpec } from './learners.ts';
 import type { SeriesInput } from './series.ts';
 
-export type ConstantGroup = 'deck' | 'algorithm' | 'learner' | 'run';
+export type ConstantGroup = 'deck' | 'view' | 'algorithm' | 'learner' | 'run';
 
 export const GROUP_LABELS: Record<ConstantGroup, string> = {
   deck: 'Колода й урок',
+  view: 'Відображення',
   algorithm: 'Алгоритм',
   learner: 'Модель учня',
   run: 'Прогін і серія',
@@ -155,7 +156,7 @@ export const REGISTRY: readonly ConstantDef[] = [
   { key: 'RUNS', group: 'run', kind: 'int', min: 1, label: 'Прогонів у серії', description: 'Скільки прогонів рахувати для статистики.', spec: 'ТЗ-02 §6' },
   { key: 'BASE_SEED', group: 'run', kind: 'int', min: 0, label: 'Початкове зерно', description: 'Прогін № i отримує зерно BASE_SEED + i. Те саме зерно — той самий прогін.', spec: 'ТЗ-02 §2' },
   { key: 'PERCENTILE', group: 'run', kind: 'int', min: 1, max: 100, label: 'Гарантія, %', description: 'У скількох відсотках прогонів результат не гірший за показаний.', spec: 'ТЗ-02 §6' },
-  { key: 'MAP_MAX_UNITS', group: 'run', kind: 'int', min: 1, label: 'Карта прогону: найбільше юнітів', description: 'Якщо юнітів у колоді більше, карта на сторінці «Прогін» не малюється. Дані прогону — у «Журнал CSV».', spec: 'ТЗ-02 §4' },
+  { key: 'MAP_MAX_UNITS', group: 'view', kind: 'int', min: 1, label: 'Карта прогону: найбільше юнітів', description: 'Якщо юнітів у колоді більше, карта на сторінці «Прогін» не малюється. Дані прогону — у «Журнал CSV».', spec: 'ТЗ-02 §4' },
 ];
 
 /** Returns Ukrainian error messages; empty array means the values are valid. */
