@@ -38,6 +38,9 @@ h2 { font-size: 17px; margin: 18px 0 8px; }
 
 /* The header scrolls away; the tab row sticks to the top edge once it reaches it. */
 nav { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin: 8px 0 12px; position: sticky; top: 0; z-index: 10; background: var(--bg); }
+/* A page toolbar that sticks right under the tab row. Heights come from lib/sticky.ts. */
+:root { --sticky-h: calc(var(--nav-h, 0px) + var(--bar-h, 0px)); }
+.sticky-bar { position: sticky; top: var(--nav-h, 0px); z-index: 9; background: var(--bg); margin: 0; padding: 8px 0; border-bottom: 1px solid var(--line); }
 nav button { border: none; background: none; padding: 10px 14px; font-size: 15px; color: var(--muted); border-bottom: 2px solid transparent; cursor: pointer; }
 nav button.active { color: var(--fg); border-bottom-color: var(--accent); font-weight: 600; }
 
@@ -99,6 +102,9 @@ table.stats.all th.grp { text-align: center; }
 /* Run map (RunMap.tsx): only graded cells are elements ("marks"); grid and guides are gradients.
    Cell sizes (--col-w, --row-h, --day-w) come from the zoom in px; label fonts stay fixed. */
 :root { --m1: #e5484d; --m3: #d9a400; --m5: #2fa84f; }
+/* Legend + tools + frame never exceed the window below the sticky bars, so after «Вмістити» all three are on screen. */
+.map-section { display: flex; flex-direction: column; max-block-size: calc(100dvh - var(--sticky-h)); padding-block-start: 4px; }
+.map-section > .legend { margin: 4px 0; }
 .map-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
 .map-tools button { min-inline-size: 2.4em; }
 .map-zoom { min-inline-size: 4ch; text-align: center; font-variant-numeric: tabular-nums; }
@@ -106,7 +112,7 @@ table.stats.all th.grp { text-align: center; }
   --grid: color-mix(in srgb, var(--fg) 8%, transparent);
   --guide-c: color-mix(in srgb, var(--fg) 30%, transparent);
   font-size: 11px; font-variant-numeric: tabular-nums;
-  max-block-size: min(76dvh, 60rem); overflow: auto; overscroll-behavior: contain;
+  min-block-size: 0; overflow: auto; overscroll-behavior: contain;
   border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
   scrollbar-width: auto; scrollbar-color: var(--muted) transparent;
   cursor: grab;
@@ -145,6 +151,7 @@ table.stats.all th.grp { text-align: center; }
 .map-marks {
   position: relative; margin-inline-start: var(--axis-w); margin-block-start: calc(var(--rows) * var(--row-h) * -1);
   inline-size: calc(var(--cols) * var(--col-w)); block-size: calc(var(--rows) * var(--row-h));
+  overflow: clip; /* at tiny zoom a 2px mark is taller than its row; keep it inside the board */
   background-image:
     repeating-linear-gradient(to right, transparent 0 calc(var(--guide) * var(--day-w) - 1px), var(--guide-c) 0 calc(var(--guide) * var(--day-w))),
     repeating-linear-gradient(to bottom, transparent 0 calc(var(--guide) * var(--row-h) - 1px), var(--guide-c) 0 calc(var(--guide) * var(--row-h))),

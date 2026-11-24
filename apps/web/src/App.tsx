@@ -1,9 +1,10 @@
 import { ALGORITHM_VERSION } from '@lexjab/core';
 import { runDeck, toSeriesInput, validateValues } from '@lexjab/sim';
 import type { ConstantValues, RunResult, SeriesResult } from '@lexjab/sim';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AllLearnersResult } from './components/AllLearners.tsx';
 import { loadValues, saveValues } from './lib/storage.ts';
+import { useHeightVar } from './lib/sticky.ts';
 import { SITE_VERSION, buildStamp } from './version.ts';
 import { ConstantsPage } from './pages/ConstantsPage.tsx';
 import { RunPage } from './pages/RunPage.tsx';
@@ -31,6 +32,8 @@ export function App() {
   const errors = useMemo(() => validateValues(values), [values]);
 
   useEffect(() => saveValues(values), [values]);
+  const navRef = useRef<HTMLElement>(null);
+  useHeightVar(navRef, '--nav-h');
   useEffect(() => {
     const onHash = () => setTab(tabFromHash());
     addEventListener('hashchange', onHash);
@@ -56,7 +59,7 @@ export function App() {
           версія {SITE_VERSION} · алгоритм {ALGORITHM_VERSION} · зібрано {buildStamp()}
         </span>
       </header>
-      <nav>
+      <nav ref={navRef}>
         {TABS.map((t) => (
           <button key={t.id} className={tab === t.id ? 'active' : ''} onClick={() => go(t.id)}>
             {t.label}

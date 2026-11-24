@@ -1,7 +1,8 @@
 import { runDeck, toSeriesInput } from '@lexjab/sim';
 import type { ConstantValues, RunResult } from '@lexjab/sim';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Deviations } from '../components/Deviations.tsx';
+import { useHeightVar } from '../lib/sticky.ts';
 import { RunMap } from '../components/RunMap.tsx';
 import { downloadText, runLogCsv } from '../lib/download.ts';
 import { fmt, parseNumber } from '../lib/format.ts';
@@ -30,10 +31,13 @@ export function RunPage({ values, errors, seed, onSeed, result, onResult }: Prop
     onResult({ values, run: r });
   };
 
+  const barRef = useRef<HTMLDivElement>(null);
+  useHeightVar(barRef, '--bar-h');
+
   const m = result?.run.metrics;
   return (
     <div>
-      <div className="toolbar">
+      <div ref={barRef} className="toolbar sticky-bar">
         <label>
           Зерно{' '}
           <input className="num" type="text" inputMode="numeric" value={seedText} onChange={(e) => setSeedText(e.target.value)} />
