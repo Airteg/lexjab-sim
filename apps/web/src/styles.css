@@ -94,17 +94,21 @@ table.stats.all th { white-space: nowrap; }
 table.stats.all th.grp { text-align: center; }
 
 /* Run map (RunMap.tsx): only graded cells are elements ("marks"); grid and guides are gradients.
-   Sizes are in em of the map font, so the whole map scales with it. */
+   Cell sizes (--col-w, --row-h, --day-w) come from the zoom in px; label fonts stay fixed. */
 :root { --m1: #e5484d; --m3: #d9a400; --m5: #2fa84f; }
+.map-tools { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0; }
+.map-tools button { min-inline-size: 2.4em; }
+.map-zoom { min-inline-size: 4ch; text-align: center; font-variant-numeric: tabular-nums; }
 .map-view {
-  --col-w: 1.4em; --row-h: 1.15em; --axis-w: 9ch; --head-h: 5.2em;
-  --grid: color-mix(in srgb, var(--fg) 7%, transparent);
-  --guide-c: color-mix(in srgb, var(--fg) 28%, transparent);
+  --grid: color-mix(in srgb, var(--fg) 8%, transparent);
+  --guide-c: color-mix(in srgb, var(--fg) 30%, transparent);
   font-size: 11px; font-variant-numeric: tabular-nums;
   max-block-size: min(76dvh, 60rem); overflow: auto; overscroll-behavior: contain;
   border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
-  scrollbar-gutter: stable both-edges; scrollbar-width: auto; scrollbar-color: var(--muted) transparent;
+  scrollbar-width: auto; scrollbar-color: var(--muted) transparent;
+  cursor: grab;
 }
+.map-view.dragging { cursor: grabbing; user-select: none; }
 .map-view::-webkit-scrollbar { inline-size: 12px; block-size: 12px; }
 .map-view::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 6px; border: 3px solid var(--bg); }
 .map-board { position: relative; inline-size: calc(var(--axis-w) + var(--cols) * var(--col-w)); block-size: calc(var(--head-h) + var(--rows) * var(--row-h)); }
@@ -118,39 +122,38 @@ table.stats.all th.grp { text-align: center; }
   position: sticky; inset-block-start: 0; z-index: 3;
   margin-inline-start: var(--axis-w); margin-block-start: calc(var(--head-h) * -1);
   inline-size: calc(var(--cols) * var(--col-w)); block-size: var(--head-h);
-  background: var(--bg); border-block-end: 1px solid var(--guide-c); color: var(--muted);
+  background: var(--bg); border-block-end: 1px solid var(--guide-c); color: var(--muted); overflow: hidden;
 }
 .map-round { position: absolute; inset-block-start: 0.3em; inset-inline-start: calc(var(--c) * var(--col-w)); padding-inline-start: 0.2em; font-weight: 600; color: var(--fg); white-space: nowrap; }
-.map-lesson {
-  position: absolute; inset-block-end: 0.3em; inset-inline-start: calc(var(--c) * var(--col-w));
-  inline-size: var(--col-w); display: flex; justify-content: center;
-}
-.map-lesson span { writing-mode: vertical-rl; transform: rotate(180deg); line-height: 1; white-space: nowrap; }
+/* Day number, written bottom to top (rotated 90° counter-clockwise), at the first lesson of the day. */
+.map-day { position: absolute; inset-block-end: 0.3em; inset-inline-start: calc(var(--c) * var(--col-w)); inline-size: max(var(--day-w), 1.2em); display: flex; justify-content: center; }
+.map-day span { writing-mode: vertical-rl; transform: rotate(180deg); line-height: 1; white-space: nowrap; }
 .map-units {
   position: sticky; inset-inline-start: 0; z-index: 2;
   inline-size: var(--axis-w); block-size: calc(var(--rows) * var(--row-h));
   background: var(--bg); border-inline-end: 1px solid var(--guide-c);
 }
 .map-unit {
-  position: absolute; inset-inline: 0; inset-block-start: calc(var(--r) * var(--row-h)); block-size: var(--row-h);
-  display: flex; justify-content: space-between; align-items: center; padding-inline: 0.5em; line-height: 1;
-  border-block-end: 1px solid var(--grid);
+  position: absolute; inset-inline: 0; inset-block-start: calc(var(--r) * var(--row-h));
+  block-size: max(var(--row-h), 1.2em); display: flex; justify-content: space-between; align-items: center;
+  padding-inline: 0.5em; line-height: 1; white-space: nowrap;
 }
 .map-unit .ef { color: var(--muted); }
-.map-unit.guide { border-block-end-color: var(--guide-c); font-weight: 600; }
 .map-marks {
   position: relative; margin-inline-start: var(--axis-w); margin-block-start: calc(var(--rows) * var(--row-h) * -1);
   inline-size: calc(var(--cols) * var(--col-w)); block-size: calc(var(--rows) * var(--row-h));
   background-image:
-    repeating-linear-gradient(to right, transparent 0 calc(var(--guide) * var(--col-w) - 1px), var(--guide-c) 0 calc(var(--guide) * var(--col-w))),
+    repeating-linear-gradient(to right, transparent 0 calc(var(--guide) * var(--day-w) - 1px), var(--guide-c) 0 calc(var(--guide) * var(--day-w))),
     repeating-linear-gradient(to bottom, transparent 0 calc(var(--guide) * var(--row-h) - 1px), var(--guide-c) 0 calc(var(--guide) * var(--row-h))),
-    repeating-linear-gradient(to right, transparent 0 calc(var(--col-w) - 1px), var(--grid) 0 var(--col-w)),
-    repeating-linear-gradient(to bottom, transparent 0 calc(var(--row-h) - 1px), var(--grid) 0 var(--row-h));
+    repeating-linear-gradient(to right, transparent 0 calc(var(--day-w) - 1px), var(--grid-x) 0 var(--day-w)),
+    repeating-linear-gradient(to bottom, transparent 0 calc(var(--row-h) - 1px), var(--grid-y) 0 var(--row-h));
 }
+/* Mark: fixed share of the cell, never thinner than 2px or shorter than 1px. */
 .mark {
-  position: absolute; inset-block-start: calc(var(--r) * var(--row-h) + (var(--row-h) - 0.35em) / 2);
-  inset-inline-start: calc(var(--c) * var(--col-w) + 0.15em);
-  inline-size: calc(var(--col-w) - 0.3em); block-size: 0.35em; border-radius: 999px;
+  --mh: clamp(2px, calc(var(--row-h) * 0.34), 6px);
+  position: absolute; inset-block-start: calc(var(--r) * var(--row-h) + (var(--row-h) - var(--mh)) / 2);
+  inset-inline-start: calc(var(--c) * var(--col-w) + var(--col-w) * 0.1);
+  inline-size: max(1px, calc(var(--col-w) * 0.8)); block-size: var(--mh); border-radius: 999px;
 }
 .mark:hover { outline: 1px solid var(--fg); outline-offset: 1px; z-index: 1; }
 .m1 { background: var(--m1); }
