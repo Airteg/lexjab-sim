@@ -71,22 +71,10 @@ table.stats td, table.stats th { border-bottom: 1px solid var(--line); padding: 
 table.stats td:not(:first-child), table.stats th:not(:first-child) { text-align: right; }
 
 .legend { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 13px; color: var(--muted); margin: 12px 0 6px; }
-.chip { display: inline-block; min-width: 20px; height: 20px; line-height: 20px; text-align: center; border-radius: 3px; color: var(--fg); }
-.rend-chip { border-right: 3px solid var(--fg); width: 10px; min-width: 10px; }
 
-.map-wrap { overflow: auto; max-height: 75vh; border: 1px solid var(--line); border-radius: 6px; }
-table.map { border-collapse: separate; border-spacing: 0; font-size: 12px; font-variant-numeric: tabular-nums; }
-table.map th, table.map td { padding: 0; min-width: 22px; height: 20px; text-align: center; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-table.map thead th { position: sticky; top: 0; background: var(--bg); z-index: 1; font-weight: 500; color: var(--muted); }
-table.map thead tr:nth-child(2) th { top: 21px; }
-table.map .sticky { position: sticky; left: 0; background: var(--bg); z-index: 2; padding: 0 6px; text-align: left; }
-table.map thead .sticky { z-index: 3; }
-table.map td.ef { padding: 0 6px; color: var(--muted); }
 .g1 { background: var(--g1); }
 .g3 { background: var(--g3); }
 .g5 { background: var(--g5); }
-.filler { box-shadow: inset 0 0 0 2px var(--fg); opacity: 0.75; }
-table.map .rend { border-right: 3px solid var(--fg); }
 
 /* Learner model: rule text, chance table, "Усі учні" table. */
 .method-note { font-size: 13px; margin-top: 6px; padding: 6px 8px; border-left: 3px solid var(--accent); background: rgba(47, 95, 208, 0.06); }
@@ -104,3 +92,71 @@ table.chances th { font-weight: 500; color: var(--muted); font-size: 13px; }
 table.stats.all { font-variant-numeric: tabular-nums; }
 table.stats.all th { white-space: nowrap; }
 table.stats.all th.grp { text-align: center; }
+
+/* Run map (RunMap.tsx): only graded cells are elements ("marks"); grid and guides are gradients.
+   Sizes are in em of the map font, so the whole map scales with it. */
+:root { --m1: #e5484d; --m3: #d9a400; --m5: #2fa84f; }
+.map-view {
+  --col-w: 1.4em; --row-h: 1.15em; --axis-w: 9ch; --head-h: 5.2em;
+  --grid: color-mix(in srgb, var(--fg) 7%, transparent);
+  --guide-c: color-mix(in srgb, var(--fg) 28%, transparent);
+  font-size: 11px; font-variant-numeric: tabular-nums;
+  max-block-size: min(76dvh, 60rem); overflow: auto; overscroll-behavior: contain;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--bg);
+  scrollbar-gutter: stable both-edges; scrollbar-width: auto; scrollbar-color: var(--muted) transparent;
+}
+.map-view::-webkit-scrollbar { inline-size: 12px; block-size: 12px; }
+.map-view::-webkit-scrollbar-thumb { background: var(--muted); border-radius: 6px; border: 3px solid var(--bg); }
+.map-board { position: relative; inline-size: calc(var(--axis-w) + var(--cols) * var(--col-w)); block-size: calc(var(--head-h) + var(--rows) * var(--row-h)); }
+.map-corner {
+  position: sticky; inset-block-start: 0; inset-inline-start: 0; z-index: 4;
+  inline-size: var(--axis-w); block-size: var(--head-h); background: var(--bg); color: var(--muted);
+  border-inline-end: 1px solid var(--guide-c); border-block-end: 1px solid var(--guide-c);
+  display: flex; flex-direction: column; justify-content: space-between; padding: 0.3em 0.5em;
+}
+.map-head {
+  position: sticky; inset-block-start: 0; z-index: 3;
+  margin-inline-start: var(--axis-w); margin-block-start: calc(var(--head-h) * -1);
+  inline-size: calc(var(--cols) * var(--col-w)); block-size: var(--head-h);
+  background: var(--bg); border-block-end: 1px solid var(--guide-c); color: var(--muted);
+}
+.map-round { position: absolute; inset-block-start: 0.3em; inset-inline-start: calc(var(--c) * var(--col-w)); padding-inline-start: 0.2em; font-weight: 600; color: var(--fg); white-space: nowrap; }
+.map-lesson {
+  position: absolute; inset-block-end: 0.3em; inset-inline-start: calc(var(--c) * var(--col-w));
+  inline-size: var(--col-w); display: flex; justify-content: center;
+}
+.map-lesson span { writing-mode: vertical-rl; transform: rotate(180deg); line-height: 1; white-space: nowrap; }
+.map-units {
+  position: sticky; inset-inline-start: 0; z-index: 2;
+  inline-size: var(--axis-w); block-size: calc(var(--rows) * var(--row-h));
+  background: var(--bg); border-inline-end: 1px solid var(--guide-c);
+}
+.map-unit {
+  position: absolute; inset-inline: 0; inset-block-start: calc(var(--r) * var(--row-h)); block-size: var(--row-h);
+  display: flex; justify-content: space-between; align-items: center; padding-inline: 0.5em; line-height: 1;
+  border-block-end: 1px solid var(--grid);
+}
+.map-unit .ef { color: var(--muted); }
+.map-unit.guide { border-block-end-color: var(--guide-c); font-weight: 600; }
+.map-marks {
+  position: relative; margin-inline-start: var(--axis-w); margin-block-start: calc(var(--rows) * var(--row-h) * -1);
+  inline-size: calc(var(--cols) * var(--col-w)); block-size: calc(var(--rows) * var(--row-h));
+  background-image:
+    repeating-linear-gradient(to right, transparent 0 calc(var(--guide) * var(--col-w) - 1px), var(--guide-c) 0 calc(var(--guide) * var(--col-w))),
+    repeating-linear-gradient(to bottom, transparent 0 calc(var(--guide) * var(--row-h) - 1px), var(--guide-c) 0 calc(var(--guide) * var(--row-h))),
+    repeating-linear-gradient(to right, transparent 0 calc(var(--col-w) - 1px), var(--grid) 0 var(--col-w)),
+    repeating-linear-gradient(to bottom, transparent 0 calc(var(--row-h) - 1px), var(--grid) 0 var(--row-h));
+}
+.mark {
+  position: absolute; inset-block-start: calc(var(--r) * var(--row-h) + (var(--row-h) - 0.35em) / 2);
+  inset-inline-start: calc(var(--c) * var(--col-w) + 0.15em);
+  inline-size: calc(var(--col-w) - 0.3em); block-size: 0.35em; border-radius: 999px;
+}
+.mark:hover { outline: 1px solid var(--fg); outline-offset: 1px; z-index: 1; }
+.m1 { background: var(--m1); }
+.m3 { background: var(--m3); }
+.m5 { background: var(--m5); }
+.mark.filler, .swatch.filler { opacity: 0.4; }
+.map-rend { position: absolute; inset-block: 0; inset-inline-start: calc((var(--c) + 1) * var(--col-w) - 1px); inline-size: 2px; background: var(--fg); }
+.swatch { display: inline-block; inline-size: 1.2em; block-size: 0.35em; border-radius: 999px; vertical-align: middle; }
+.rend-swatch { inline-size: 2px; block-size: 1em; border-radius: 0; background: var(--fg); }
