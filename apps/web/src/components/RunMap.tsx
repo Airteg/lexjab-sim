@@ -2,6 +2,7 @@ import type { CSSProperties, PointerEvent as ReactPointerEvent } from 'react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { RunResult } from '@lexjab/sim';
 import { efText } from '../lib/format.ts';
+import { stickyHeight } from '../lib/sticky.ts';
 
 // Map of one run: rows = units in deck order, columns = lessons.
 // Only graded cells become DOM elements ("marks"); the grid and the guides are CSS gradients.
@@ -82,13 +83,27 @@ export function RunMap({ result }: { result: RunResult }) {
     setZoom(z);
   };
 
+  const section = useRef<HTMLDivElement>(null);
+
+  /**
+   * «Вмістити»: scrolls the page so that legend, tools and map sit right under the sticky bars,
+   * and picks the zoom at which the whole map fits the frame there (width and height).
+   */
   const fit = () => {
     const v = view.current;
-    if (!v) return;
-    const z = Math.min((v.clientWidth - AXIS_W) / (cols * BASE_COL), (window.innerHeight * 0.76 - HEAD_H) / (rows * BASE_ROW));
+    const sec = section.current;
+    if (!v || !sec) return;
+    const sticky = stickyHeight();
+    // Space for the frame: window below the sticky bars, minus legend and tools above the frame.
+    const above = v.getBoundingClientRect().top - sec.getBoundingClientRect().top;
+    const frameH = window.innerHeight - sticky - above - 2; // 2 = frame border
+    const frameW = v.offsetWidth - 2;
+    // 0.995: keep a pixel of slack so rounding never brings the scrollbars back.
+    const z = 0.995 * Math.min((frameW - AXIS_W) / (cols * BASE_COL), (frameH - HEAD_H) / (rows * BASE_ROW));
     anchor.current = null;
     setZoom(clampZoom(z));
     v.scrollTo(0, 0);
+    window.scrollTo({ top: window.scrollY + sec.getBoundingClientRect().top - sticky, behavior: 'instant' });
   };
 
   useLayoutEffect(() => {
@@ -203,7 +218,7 @@ export function RunMap({ result }: { result: RunResult }) {
   };
 
   return (
-    <div className={`palette-${palette}`}>
+    <div ref={section} className={`map-section palette-${palette}`}>
       <MapLegend />
       <div className="map-tools">
         <button onClick={() => zoomTo(zoom / ZOOM_STEP)} disabled={zoom <= ZOOM_MIN} title="Зменшити (Ctrl + коліщатко)">
