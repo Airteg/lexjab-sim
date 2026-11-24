@@ -44,6 +44,9 @@ nav button.active { color: var(--fg); border-bottom-color: var(--accent); font-w
 button { font: inherit; padding: 7px 12px; border: 1px solid var(--line); border-radius: 6px; background: transparent; color: var(--fg); cursor: pointer; }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
 button:disabled { opacity: 0.45; cursor: default; }
+/* color-scheme makes native parts (select drop-down list, scrollbars) follow the light/dark theme. */
+:root { color-scheme: light dark; }
+option { color: var(--fg); background-color: var(--bg); }
 input, select { font: inherit; color: var(--fg); background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; }
 input.num { width: 7em; text-align: right; }
 
