@@ -1,9 +1,10 @@
 import { ALGORITHM_VERSION } from '@lexjab/core';
-import { SIM_VERSION, runDeck, toSeriesInput, validateValues } from '@lexjab/sim';
+import { runDeck, toSeriesInput, validateValues } from '@lexjab/sim';
 import type { ConstantValues, RunResult, SeriesResult } from '@lexjab/sim';
 import { useEffect, useMemo, useState } from 'react';
 import type { AllLearnersResult } from './components/AllLearners.tsx';
 import { loadValues, saveValues } from './lib/storage.ts';
+import { SITE_VERSION, buildStamp } from './version.ts';
 import { ConstantsPage } from './pages/ConstantsPage.tsx';
 import { RunPage } from './pages/RunPage.tsx';
 import { SeriesPage } from './pages/SeriesPage.tsx';
@@ -52,7 +53,7 @@ export function App() {
       <header>
         <h1>LexJab Sim</h1>
         <span className="muted">
-          алгоритм {ALGORITHM_VERSION} · симулятор {SIM_VERSION}
+          версія {SITE_VERSION} · алгоритм {ALGORITHM_VERSION} · зібрано {buildStamp()}
         </span>
       </header>
       <nav>
