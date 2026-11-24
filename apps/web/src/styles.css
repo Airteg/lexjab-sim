@@ -162,7 +162,13 @@ table.stats.all th.grp { text-align: center; }
 .m1 { background: var(--m1); }
 .m3 { background: var(--m3); }
 .m5 { background: var(--m5); }
-.mark.filler, .swatch.filler { opacity: 0.4; }
+/* "soft" palette (the default colours above): a filler is its grade colour, faded. */
+.palette-soft .mark.filler, .palette-soft .swatch.filler { opacity: 0.4; }
+/* "pure" palette: bright red and green, the same yellow, fillers in blue whatever the grade. */
+.palette-pure { --m1: #ff0000; --m5: #00b000; --filler: #008cff; }
+.palette-pure .mark.filler, .palette-pure .swatch.filler { background: var(--filler); }
+.map-palette { display: inline-flex; align-items: center; gap: 4px; margin-inline-start: 6px; }
+.map-palette input { inline-size: auto; padding: 0; }
 .map-rend { position: absolute; inset-block: 0; inset-inline-start: calc((var(--c) + 1) * var(--col-w) - 1px); inline-size: 2px; background: var(--fg); }
 .swatch { display: inline-block; inline-size: 1.2em; block-size: 0.35em; border-radius: 999px; vertical-align: middle; }
 .rend-swatch { inline-size: 2px; block-size: 1em; border-radius: 0; background: var(--fg); }

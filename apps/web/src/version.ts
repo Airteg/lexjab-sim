@@ -4,7 +4,7 @@ import { SIM_VERSION } from '@lexjab/sim';
  * Site build number: the 4th digit of the version shown in the header (e.g. 0.2.1.1).
  * Bump it in every PR that changes apps/web; reset it to 0 when SIM_VERSION changes.
  */
-export const SITE_BUILD = 1;
+export const SITE_BUILD = 2;
 
 export const SITE_VERSION = `${SIM_VERSION}.${SITE_BUILD}`;
 

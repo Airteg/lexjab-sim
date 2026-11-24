@@ -26,6 +26,18 @@ const GUIDE = 10;
 
 type Vars = CSSProperties & Record<`--${string}`, string | number>;
 
+/** Mark colours: "pure" — bright red / green and a blue filler; "soft" — the previous muted set. */
+type Palette = 'pure' | 'soft';
+const PALETTE_KEY = 'lexjab-sim/map-palette';
+
+function loadPalette(): Palette {
+  try {
+    return localStorage.getItem(PALETTE_KEY) === 'soft' ? 'soft' : 'pure';
+  } catch {
+    return 'pure';
+  }
+}
+
 const clampZoom = (z: number) => Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, z));
 const labelStep = (px: number) => STEPS.find((s) => s * px >= LABEL_GAP) ?? STEPS[STEPS.length - 1]!;
 const pct = (z: number) => `${Math.round(z * 100)}%`;
@@ -37,6 +49,16 @@ export function RunMap({ result }: { result: RunResult }) {
   const days = Math.ceil(cols / lpd);
 
   const [zoom, setZoom] = useState(1);
+  const [palette, setPalette] = useState<Palette>(loadPalette);
+  const togglePalette = () => {
+    const next: Palette = palette === 'pure' ? 'soft' : 'pure';
+    setPalette(next);
+    try {
+      localStorage.setItem(PALETTE_KEY, next);
+    } catch {
+      // storage unavailable: the choice lasts until reload
+    }
+  };
   const view = useRef<HTMLDivElement>(null);
   // Content point (in cells) that must stay under the same screen point after a zoom change.
   const anchor = useRef<{ cx: number; cy: number; ax: number; ay: number } | null>(null);
@@ -181,7 +203,8 @@ export function RunMap({ result }: { result: RunResult }) {
   };
 
   return (
-    <div>
+    <div className={`palette-${palette}`}>
+      <MapLegend />
       <div className="map-tools">
         <button onClick={() => zoomTo(zoom / ZOOM_STEP)} disabled={zoom <= ZOOM_MIN} title="Зменшити (Ctrl + коліщатко)">
           −
@@ -192,6 +215,9 @@ export function RunMap({ result }: { result: RunResult }) {
         </button>
         <button onClick={() => zoomTo(1)}>100%</button>
         <button onClick={fit}>Вмістити</button>
+        <label className="map-palette">
+          <input type="checkbox" checked={palette === 'pure'} onChange={togglePalette} /> Чисті кольори
+        </label>
         <span className="muted">
           Тягни мишею, щоб рухати карту. Підписи: юніти — {unitStep === 1 ? 'усі, з EF' : `кожен ${unitStep}-й`}, дні —{' '}
           {dayStep === 1 ? 'усі' : `кожен ${dayStep}-й`}.
@@ -232,7 +258,7 @@ export function RunMap({ result }: { result: RunResult }) {
   );
 }
 
-export function MapLegend() {
+function MapLegend() {
   return (
     <div className="legend">
       <span className="swatch m1" /> «1» Ще раз <span className="swatch m3" /> «3» Повторити <span className="swatch m5" /> «5» Добре

@@ -2,7 +2,7 @@ import { runDeck, toSeriesInput } from '@lexjab/sim';
 import type { ConstantValues, RunResult } from '@lexjab/sim';
 import { useState } from 'react';
 import { Deviations } from '../components/Deviations.tsx';
-import { MapLegend, RunMap } from '../components/RunMap.tsx';
+import { RunMap } from '../components/RunMap.tsx';
 import { downloadText, runLogCsv } from '../lib/download.ts';
 import { fmt, parseNumber } from '../lib/format.ts';
 
@@ -69,6 +69,14 @@ export function RunPage({ values, errors, seed, onSeed, result, onResult }: Prop
             {result.run.completed ? 'прогін завершений' : 'прогін НЕ завершений (аварійна межа)'}
           </p>
           <Deviations values={result.values} />
+          {result.run.input.deckSize <= result.values.MAP_MAX_UNITS ? (
+            <RunMap result={result.run} />
+          ) : (
+            <p className="muted">
+              Карту не намальовано: у колоді {result.run.input.deckSize} юнітів, межа — {result.values.MAP_MAX_UNITS} (константа «Карта прогону:
+              найбільше юнітів»). Повні дані прогону — у «Журнал CSV». ТЗ-02 §4
+            </p>
+          )}
           <table className="stats">
             <thead>
               <tr>
@@ -101,17 +109,6 @@ export function RunPage({ values, errors, seed, onSeed, result, onResult }: Prop
               <tr><td>Місця заповнювачів</td><td>{m.fillerSlots}</td></tr>
             </tbody>
           </table>
-          {result.run.input.deckSize <= result.values.MAP_MAX_UNITS ? (
-            <>
-              <MapLegend />
-              <RunMap result={result.run} />
-            </>
-          ) : (
-            <p className="muted">
-              Карту не намальовано: у колоді {result.run.input.deckSize} юнітів, межа — {result.values.MAP_MAX_UNITS} (константа «Карта прогону:
-              найбільше юнітів»). Повні дані прогону — у «Журнал CSV». ТЗ-02 §4
-            </p>
-          )}
         </>
       )}
     </div>
